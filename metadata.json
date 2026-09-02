@@ -1,0 +1,6 @@
+{
+  "name": "RoamStory - Premium Travel & Exploration",
+  "description": "A luxury travel magazine, destination discovery, and bespoke tour booking platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
