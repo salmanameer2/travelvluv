@@ -12,19 +12,25 @@ import {
 } from 'lucide-react';
 import { companyInfo } from '../assets/assets.js';
 import SectionHeading from './SectionHeading.jsx';
+import { contactService } from '../services/contactService.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Contact() {
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     subject: 'General Inquiry',
     message: '',
+    honeypot: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -33,26 +39,64 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+    setError('');
+    setWarning('');
+
+    // Honeypot check for bots
+    if (formData.honeypot) {
+      setIsSuccess(true);
+      return;
+    }
+
+    const { name, email, phone, subject, message } = formData;
+    if (!name.trim() || !email.trim() || !message.trim()) {
       setError('Please fill in all required fields.');
       return;
     }
-    setError('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (name.length > 100 || email.length > 255 || message.length > 5000 || phone.length > 30) {
+      setError('Input exceeds maximum allowed length.');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: 'General Inquiry',
-        message: '',
-      });
-    }, 800);
+    const { error: submitError, emailFailed } = await contactService.submitContactMessage({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      subject: subject.trim(),
+      message: message.trim()
+    }, user?.id || null);
+
+    setIsSubmitting(false);
+
+    if (submitError && !emailFailed) {
+      setError(submitError.message || 'Unable to send your message right now. Please try again.');
+      return;
+    }
+
+    setIsSuccess(true);
+    if (emailFailed) {
+      setWarning(submitError.message);
+    }
+    
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      subject: 'General Inquiry',
+      message: '',
+      honeypot: '',
+    });
   };
 
   return (
@@ -154,8 +198,13 @@ export default function Contact() {
                 <p className="text-xs sm:text-sm text-gray-600 mt-2 max-w-md mx-auto">
                   Thank you for reaching out. One of our dedicated travel curators will respond within 24 business hours.
                 </p>
+                {warning && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-xl max-w-md mx-auto">
+                    {warning}
+                  </div>
+                )}
                 <button
-                  onClick={() => setIsSuccess(false)}
+                  onClick={() => { setIsSuccess(false); setWarning(''); }}
                   className="mt-6 px-6 py-2.5 bg-[#2D5A46] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-[#234837]"
                 >
                   Send Another Inquiry
@@ -172,6 +221,17 @@ export default function Contact() {
                     {error}
                   </div>
                 )}
+
+                {/* Honeypot field - hidden from users */}
+                <input
+                  type="text"
+                  name="honeypot"
+                  style={{ display: 'none' }}
+                  tabIndex="-1"
+                  autoComplete="off"
+                  value={formData.honeypot}
+                  onChange={handleChange}
+                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -233,7 +293,7 @@ export default function Contact() {
                       <option value="General Inquiry">General Inquiry</option>
                       <option value="Bespoke Trip Planning">Bespoke Trip Planning</option>
                       <option value="Private Group Charter">Private Group Charter</option>
-                      <option value="Press & Media">Press & Media</option>
+                      <option value="Press and Media">Press and Media</option>
                     </select>
                   </div>
                 </div>
@@ -259,11 +319,14 @@ export default function Contact() {
                   className="w-full py-3.5 rounded-xl bg-[#2D5A46] hover:bg-[#234837] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   {isSubmitting ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>SENDING MESSAGE...</span>
+                    </>
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>Send Message</span>
+                      <span>SEND MESSAGE</span>
                     </>
                   )}
                 </button>
