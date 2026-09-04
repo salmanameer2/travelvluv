@@ -226,10 +226,7 @@ export default function AuthModal({
       if (error) {
         setError(error);
       } else {
-        setSuccessMsg(isConfigured ? 'Please check your email to verify your account.' : 'Account created successfully!');
-        if (!isConfigured) {
-          // It auto-logged in via fallback
-        }
+        window.location.href = '/';
       }
     } else {
       const { error } = await signIn({
@@ -240,7 +237,7 @@ export default function AuthModal({
       if (error) {
         setError(error);
       } else {
-        setSuccessMsg('Logged in successfully!');
+        window.location.href = '/';
       }
     }
   };
