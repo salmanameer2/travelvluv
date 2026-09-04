@@ -34,7 +34,7 @@ const mapDbBookingToFrontend = (b) => {
     selectedActivities: Array.isArray(b.preferred_activities) ? b.preferred_activities : [],
     specialRequests: b.special_requests,
     total: Number(b.estimated_price || 0),
-    status: (b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1) : 'Pending'),
+    status: (b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1) : 'Confirmed'),
   };
 };
 
@@ -88,7 +88,7 @@ export const bookingService = {
         preferred_activities: bookingData.selectedActivities || [],
         special_requests: bookingData.specialRequests || '',
         estimated_price: Number(bookingData.total) || 0,
-        status: 'pending',
+        status: 'confirmed',
       };
 
       const { data, error } = await supabase
@@ -214,10 +214,14 @@ export const bookingService = {
         };
       }
 
+      // Direct table update governed by Supabase RLS
       const { data, error } = await supabase
-        .rpc('cancel_booking', {
-          p_booking_id: String(bookingId)
-        });
+        .from('bookings')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('id', bookingId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
 
       if (error) throw error;
 

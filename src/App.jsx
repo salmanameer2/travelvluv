@@ -1,4 +1,3 @@
-import AdminDashboard from "./components/AdminDashboard.jsx";
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
@@ -27,21 +26,6 @@ import { favoriteService } from './services/favoriteService.js';
 export default function App() {
   const { user, profile, signOut, updateUserProfile } = useAuth();
   
-  const [currentView, setCurrentView] = useState(window.location.pathname === '/admin' ? 'admin' : 'home');
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setCurrentView(window.location.pathname === '/admin' ? 'admin' : 'home');
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const navigateTo = (path) => {
-    window.history.pushState({}, '', path);
-    setCurrentView(path === '/admin' ? 'admin' : 'home');
-  };
-
   // Modal & Drawer State
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authInitialTab, setAuthInitialTab] = useState('bookings');
@@ -161,12 +145,6 @@ export default function App() {
   const handleAddBooking = (newBooking) => {
     setBookings(prev => [newBooking, ...prev]);
   };
-
-  if (currentView === 'admin') {
-    return (
-      <AdminDashboard onBack={() => navigateTo('/')} />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white text-[#1A1D20] font-sans selection:bg-[#2D5A46] selection:text-white">

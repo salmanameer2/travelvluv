@@ -25,7 +25,6 @@ import {
   Trash2,
   ExternalLink,
   ChevronRight,
-  ShieldCheck,
   Award,
   Heart,
   Settings,
@@ -112,7 +111,6 @@ export default function AuthModal({
       if (!matchesSearch) return false;
 
       if (bookingFilter === 'all') return true;
-      if (bookingFilter === 'pending') return b.status === 'Pending';
       if (bookingFilter === 'confirmed') return b.status === 'Confirmed';
       if (bookingFilter === 'upcoming') return b.status === 'Upcoming' || b.status === 'Confirmed';
       if (bookingFilter === 'completed') return b.status === 'Completed';
@@ -442,12 +440,6 @@ export default function AuthModal({
                         {[
                           { id: 'all', label: `All (${bookings.length})` },
                           {
-                            id: 'pending',
-                            label: `Pending (${
-                              bookings.filter((b) => b.status === 'Pending').length
-                            })`,
-                          },
-                          {
                             id: 'upcoming',
                             label: `Upcoming (${upcomingCount})`,
                           },
@@ -529,8 +521,6 @@ export default function AuthModal({
                                           ? 'bg-emerald-100 text-emerald-800'
                                           : b.status === 'Upcoming'
                                           ? 'bg-blue-100 text-blue-800'
-                                          : b.status === 'Pending'
-                                          ? 'bg-amber-100 text-amber-800'
                                           : b.status === 'Completed'
                                           ? 'bg-gray-100 text-gray-700'
                                           : 'bg-rose-100 text-rose-800'
