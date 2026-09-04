@@ -1,131 +1,85 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Clock,
+import { 
+  Mail, 
+  MapPin, 
+  Phone, 
+  Clock, 
   Send,
-  CheckCircle2,
-  Sparkles,
-  MessageSquare,
+  CheckCircle2 
 } from 'lucide-react';
 import { companyInfo } from '../assets/assets.js';
 import SectionHeading from './SectionHeading.jsx';
-import { contactService } from '../services/contactService.js';
-import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Contact() {
-  const { user } = useAuth();
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     subject: 'General Inquiry',
     message: '',
-    honeypot: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [warning, setWarning] = useState('');
 
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-    setWarning('');
-
-    // Honeypot check for bots
-    if (formData.honeypot) {
-      setIsSuccess(true);
-      return;
-    }
-
-    const { name, email, phone, subject, message } = formData;
-    if (!name.trim() || !email.trim() || !message.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       setError('Please fill in all required fields.');
       return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
-    if (name.length > 100 || email.length > 255 || message.length > 5000 || phone.length > 30) {
-      setError('Input exceeds maximum allowed length.');
-      return;
-    }
-
+    setError('');
     setIsSubmitting(true);
 
-    const { error: submitError, emailFailed } = await contactService.submitContactMessage({
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      subject: subject.trim(),
-      message: message.trim()
-    }, user?.id || null);
-
-    setIsSubmitting(false);
-
-    if (submitError && !emailFailed) {
-      setError(submitError.message || 'Unable to send your message right now. Please try again.');
-      return;
-    }
-
-    setIsSuccess(true);
-    if (emailFailed) {
-      setWarning(submitError.message);
-    }
-    
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: 'General Inquiry',
-      message: '',
-      honeypot: '',
-    });
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: 'General Inquiry',
+        message: '',
+      });
+    }, 800);
   };
 
   return (
-    <section id="contact" className="py-24 bg-white border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <SectionHeading
-          eyebrow="Get in Touch"
-          title="Speak with a Travel Curator"
-          subtitle="Whether you have questions about an upcoming journey or wish to design a custom group expedition, our team is at your service."
+    <section id="contact" className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <SectionHeading 
+          title="Curate Your Journey" 
+          subtitle="Get in Touch" 
+          description="Speak directly with our travel designers to begin crafting your bespoke itinerary."
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Contact Cards & Location Info */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-[#FBFBF9] p-8 rounded-3xl border border-gray-200/80 space-y-6">
-              <h4 className="text-xl font-serif font-bold text-gray-900">
-                Direct Inquiries & Concierge
-              </h4>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-16">
+          {/* Left Contact Information */}
+          <div className="lg:col-span-5 flex flex-col justify-between">
+            <div>
+              <h3 className="text-3xl font-serif font-bold text-gray-900 mb-6">
+                Let's begin the conversation.
+              </h3>
+              <p className="text-gray-600 leading-relaxed mb-10 text-sm">
+                Whether you have a specific destination in mind or simply an appetite for discovery, our concierge team is at your service to transform your vision into reality.
+              </p>
 
-              <div className="space-y-4 text-xs sm:text-sm">
+              <div className="space-y-8 mb-12">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-[#E8F0EC] text-[#2D5A46] flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="font-bold text-gray-900 block">Sanctuary Headquarters</span>
-                    <span className="text-gray-600 leading-relaxed block mt-0.5">
-                      {companyInfo.address}
-                    </span>
+                    <span className="font-bold text-gray-900 block">Headquarters</span>
+                    <span className="text-gray-600 block mt-0.5 leading-relaxed">{companyInfo.address}</span>
                   </div>
                 </div>
 
@@ -134,11 +88,8 @@ export default function Contact() {
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="font-bold text-gray-900 block">Email Us</span>
-                    <a
-                      href={`mailto:${companyInfo.email}`}
-                      className="text-[#2D5A46] font-semibold hover:underline block mt-0.5"
-                    >
+                    <span className="font-bold text-gray-900 block">Direct Inquiries</span>
+                    <a href={`mailto:${companyInfo.email}`} className="text-gray-600 block mt-0.5 hover:text-[#2D5A46] transition-colors">
                       {companyInfo.email}
                     </a>
                   </div>
@@ -198,13 +149,9 @@ export default function Contact() {
                 <p className="text-xs sm:text-sm text-gray-600 mt-2 max-w-md mx-auto">
                   Thank you for reaching out. One of our dedicated travel curators will respond within 24 business hours.
                 </p>
-                {warning && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 text-amber-700 text-xs rounded-xl max-w-md mx-auto">
-                    {warning}
-                  </div>
-                )}
+                
                 <button
-                  onClick={() => { setIsSuccess(false); setWarning(''); }}
+                  onClick={() => setIsSuccess(false)}
                   className="mt-6 px-6 py-2.5 bg-[#2D5A46] text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-[#234837]"
                 >
                   Send Another Inquiry
@@ -215,23 +162,12 @@ export default function Contact() {
                 <h4 className="text-xl font-serif font-bold text-gray-900 mb-2">
                   Send Us a Direct Message
                 </h4>
-
+                
                 {error && (
                   <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
                     {error}
                   </div>
                 )}
-
-                {/* Honeypot field - hidden from users */}
-                <input
-                  type="text"
-                  name="honeypot"
-                  style={{ display: 'none' }}
-                  tabIndex="-1"
-                  autoComplete="off"
-                  value={formData.honeypot}
-                  onChange={handleChange}
-                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -248,7 +184,6 @@ export default function Contact() {
                       className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#2D5A46]"
                     />
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
                       Email Address <span className="text-rose-500">*</span>
@@ -279,7 +214,6 @@ export default function Contact() {
                       className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#2D5A46]"
                     />
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
                       Subject
@@ -293,7 +227,7 @@ export default function Contact() {
                       <option value="General Inquiry">General Inquiry</option>
                       <option value="Bespoke Trip Planning">Bespoke Trip Planning</option>
                       <option value="Private Group Charter">Private Group Charter</option>
-                      <option value="Press and Media">Press and Media</option>
+                      <option value="Press & Media">Press & Media</option>
                     </select>
                   </div>
                 </div>
@@ -319,14 +253,11 @@ export default function Contact() {
                   className="w-full py-3.5 rounded-xl bg-[#2D5A46] hover:bg-[#234837] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>SENDING MESSAGE...</span>
-                    </>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>SEND MESSAGE</span>
+                      <span>Send Message</span>
                     </>
                   )}
                 </button>
