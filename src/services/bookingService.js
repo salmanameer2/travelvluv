@@ -34,7 +34,7 @@ const mapDbBookingToFrontend = (b) => {
     selectedActivities: Array.isArray(b.preferred_activities) ? b.preferred_activities : [],
     specialRequests: b.special_requests,
     total: Number(b.estimated_price || 0),
-    status: (b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1) : 'Confirmed'),
+    status: (b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1) : 'Pending'),
   };
 };
 
@@ -88,7 +88,7 @@ export const bookingService = {
         preferred_activities: bookingData.selectedActivities || [],
         special_requests: bookingData.specialRequests || '',
         estimated_price: Number(bookingData.total) || 0,
-        status: 'confirmed',
+        status: 'pending',
       };
 
       const { data, error } = await supabase
@@ -215,15 +215,9 @@ export const bookingService = {
       }
 
       const { data, error } = await supabase
-        .from('bookings')
-        .update({
-          status: 'cancelled',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', user.id)
-        .or(`id.eq.${bookingId},confirmation_number.eq.${bookingId}`)
-        .select()
-        .single();
+        .rpc('cancel_booking', {
+          p_booking_id: String(bookingId)
+        });
 
       if (error) throw error;
 

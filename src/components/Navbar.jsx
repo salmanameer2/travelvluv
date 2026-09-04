@@ -16,6 +16,7 @@ import {
   CalendarCheck,
   ChevronRight,
   LogOut,
+  ShieldCheck,
 } from 'lucide-react';
 import { companyInfo, navigationLinks, socialLinks } from '../assets/assets.js';
 
@@ -133,6 +134,20 @@ export default function Navbar({
               </button>
 
               {/* User Account / Profile & Bookings Button */}
+              {user?.role === 'admin' && (
+                <button
+                  onClick={() => {
+                    window.history.pushState({}, '', '/admin');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="hidden sm:flex items-center gap-1.5 py-1 px-3 rounded-full bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors text-xs font-bold border border-rose-100 cursor-pointer"
+                  title="Admin Dashboard"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Admin</span>
+                </button>
+              )}
+
               {user ? (
                 <div className="relative group hidden sm:block">
                   <button
@@ -213,6 +228,22 @@ export default function Navbar({
 
                 {/* User status in mobile drawer */}
                 <div className="my-4 p-3 bg-gray-50 rounded-xl space-y-3">
+                  {user?.role === 'admin' && (
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        window.history.pushState({}, '', '/admin');
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-800 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Admin Dashboard</span>
+                      </span>
+                    </button>
+                  )}
+
                   {user ? (
                     <>
                       <div className="flex items-center gap-3">
